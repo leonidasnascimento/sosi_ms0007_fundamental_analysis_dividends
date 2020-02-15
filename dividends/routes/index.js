@@ -12,9 +12,10 @@ router.get('/', function (req, res, next) {
   }
 
   new dividends().get_dividend_analysis(stock_code, (result) => {
-    res.status(HttpStatus.OK).send(result)
-  }, (erro) => {
-    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(erro)
+    res.status(HttpStatus.OK).type("json").send(JSON.stringify(result))
+  }, (error) => {
+    console.error(error)
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(error)
   });
 });
 

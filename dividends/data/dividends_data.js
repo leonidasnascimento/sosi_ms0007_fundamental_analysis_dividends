@@ -1,37 +1,70 @@
-// Import the Google Cloud client library using default credentials
 const {
-    BigQuery
-} = require('@google-cloud/bigquery');
+    Connection,
+    Request
+} = require("tedious");
 
-module.exports = class {
-    async get_dividend_analysis(stock_code, on_success, on_error) {
-        try {
+// Create connection to database
+const config = {
+    authentication: {
+        options: {
+            userName: "sosi",
+            password: "L&on!das01"
+        },
+        type: "default"
+    },
+    server: "sosi-db.database.windows.net", // update me
+    options: {
+        database: "fundamental-analysis", //update me
+        encrypt: true
+    }
+};
 
-            var query = ""
-            query = "DECLARE IN_STOCK_CODE STRING DEFAULT NULL; ";
+const execute_query = function (query, call_back) {
+    var return_lst = []
+    var connection = new Connection(config);
 
-            if (stock_code != undefined && stock_code != null && stock_code != "")
-                query = query + "SET IN_STOCK_CODE = '" + stock_code + "'; ";
+    connection.on("connect", err => {
+        if (err) {
+            throw new Error(err.message)
+        } else {
+            const request = new Request(query,
+                (err, rowCount) => {
+                    if (err) {
+                        throw new Error(err.message)
+                    } else {
+                        connection.close()
+                        call_back(return_lst);
+                    }
+                }
+            );
 
-            query = query + "CALL fundamental_analysis.GetDividendAnalysis(IN_STOCK_CODE);";
+            request.on("row", (columns) => {
+                var row = {}
 
-            // For all options, see https://cloud.google.com/bigquery/docs/reference/rest/v2/jobs/query
-            const options = {
-                query: query,
-                // Location must match that of the dataset(s) referenced in the query.
-                location: 'US',
-            };
+                columns.forEach(column => {
+                    row[column.metadata.colName] = column.value
+                });
 
-            // Run the query
-            const [rows] = await new BigQuery().query(options);
-            var return_arr = []
-
-            rows.forEach(row => {
-                return_arr.push(row)
+                return_lst.push(row)
             });
 
-            on_success(return_arr)
+            request.on("doneInProc", (rowCount, more, rows) => {})
+
+            connection.execSql(request);
+        }
+    });
+}
+
+module.exports = class {
+    get_dividend_analysis(stock_code, on_success, on_error) {
+        try {
+            var query = "EXECUTE [dbo].[sp_get_dividend_analysis] @stock_code = '" + stock_code + "';"
+
+            execute_query(query, (result) => {
+                on_success(result)
+            });
         } catch (error) {
+            console.error(error)
             on_error(error)
         }
     }
