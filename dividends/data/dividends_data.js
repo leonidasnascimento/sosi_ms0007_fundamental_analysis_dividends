@@ -3,18 +3,20 @@ const {
     Request
 } = require("tedious");
 
+const db_config = require("../db.json")
+
 // Create connection to database
 const config = {
     authentication: {
         options: {
-            userName: "sosi",
-            password: "L&on!das01"
+            userName: db_config.userName,
+            password: db_config.password
         },
         type: "default"
     },
-    server: "sosi-db.database.windows.net", // update me
+    server: db_config.server, // update me
     options: {
-        database: "fundamental-analysis", //update me
+        database: db_config.database, //update me
         encrypt: true
     }
 };
