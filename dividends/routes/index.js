@@ -90,7 +90,7 @@ router.post('/', function (req, res, next) {
     return;
   }
 
-  if (!("dividend_yeld" in req.body)) {
+  if (!("dividend_yield" in req.body)) {
     res.status(HttpStatus.BAD_REQUEST).send("Field 'dividend_yeld' is required");
     return;
   }
@@ -145,7 +145,7 @@ router.post('/', function (req, res, next) {
     return;
   }
 
-  new dividends().set_dividend_analysis(req.body.stock_code, req.body.company, req.body.sector, req.body.second_sector, req.body.stock_price, req.body.stock_type, req.body.valuation, req.body.stock_available_volume, req.body.vol_negotiated_last_21, req.body.dividend_last_price, req.body.company_net_profit, req.body.dividend_yeld, req.body.dividend_avg_payout_12_mos, req.body.dividend_avg_payout_5_yrs, req.body.major_share_holder, req.body.company_roe, req.body.company_roe_5_yrs, req.body.comp_grossdebt_ebtida, req.body.dividend_yield_5_yrs, req.body.has_dividend_srd_5_yrs, req.body.has_dividend_grwth_5_yrs, req.body.has_net_profit_reg_5_yrs, (result) => {
+  new dividends().set_dividend_analysis(req.body.stock_code, req.body.company, req.body.sector, req.body.second_sector, req.body.stock_price, req.body.stock_type, req.body.valuation, req.body.stock_available_volume, req.body.vol_negotiated_last_21, req.body.dividend_last_price, req.body.company_net_profit, req.body.dividend_yield, req.body.dividend_avg_payout_12_mos, req.body.dividend_avg_payout_5_yrs, req.body.major_share_holder, req.body.company_roe, req.body.company_roe_5_yrs, req.body.comp_grossdebt_ebtida, req.body.dividend_yield_5_yrs, req.body.has_dividend_srd_5_yrs, req.body.has_dividend_grwth_5_yrs, req.body.has_net_profit_reg_5_yrs, (result) => {
     res.status(HttpStatus.OK).type("json").send(JSON.stringify(result))
   }, (error) => {
     res.status(HttpStatus.INTERNAL_SERVER_ERROR).type("json").send(JSON.stringify(error))
