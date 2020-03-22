@@ -3,7 +3,43 @@ var router = express.Router();
 var dividends = require('../data/dividends_data');
 var HttpStatus = require('http-status-codes');
 
-/* GET home page. */
+var isGoodDividendPayer = function (company) {
+  if (company == null) return false
+  if (!("COMPANY" in company)) return false
+  if (!("STOCK_AVAILABLE_VOLUME" in company)) return false
+  if (!("VOL_NEGOTIATED_LAST_21" in company)) return false
+  if (!("DIVIDEND_AVG_PAYOUT_12_MOS" in company)) return false
+  if (!("DIVIDEND_AVG_PAYOUT_5_YRS" in company)) return false
+  if (!("VALUATION" in company)) return false
+  if (!("COMPANY_ROE" in company)) return false
+  if (!("COMPANY_ROE_5_YRS" in company)) return false
+  if (!("COMP_GROSSDEBT_EBTIDA" in company)) return false
+  if (!("HAS_DIVIDEND_GRWTH_5_YRS" in company)) return false
+  if (!("HAS_DIVIDEND_SRD_5_YRS" in company)) return false
+  if (!("HAS_NET_PROFIT_REG_5_YRS" in company)) return false
+  if (!("DIVIDEND_YIELD" in company)) return false
+  if (!("DIVIDEND_YIELD_5_YRS" in company)) return false
+
+  if (company.COMPANY == "") return false
+
+  // var avgVolOverAvailableVolume = (parseInt(company.STOCK_AVAILABLE_VOLUME) * .2)
+  if ((parseInt(company.STOCK_AVAILABLE_VOLUME) >= 400000000) &&
+    // (parseInt(company.VOL_NEGOTIATED_LAST_21) >= parseInt(avgVolOverAvailableVolume)) &&
+    (parseFloat(company.DIVIDEND_AVG_PAYOUT_12_MOS) <= .7) &&
+    (parseFloat(company.VALUATION) >= 500000000) &&
+    (parseFloat(company.COMPANY_ROE) >= .1) &&
+    (parseFloat(company.COMP_GROSSDEBT_EBTIDA) <= .5) &&
+    (parseInt(company.HAS_DIVIDEND_GRWTH_5_YRS) == 1) &&
+    (parseInt(company.HAS_DIVIDEND_SRD_5_YRS) == 1) &&
+    (parseInt(company.HAS_NET_PROFIT_REG_5_YRS) == 1) &&
+    (parseFloat(company.DIVIDEND_YIELD) >= .03) &&
+    (parseFloat(company.DIVIDEND_YIELD_5_YRS) >= .03)) {
+    return true
+  } else {
+    return false
+  }
+}
+
 router.get('/', function (req, res, next) {
   var stock_code = ""
 
@@ -18,12 +54,32 @@ router.get('/', function (req, res, next) {
   });
 });
 
+router.get('/best_dividend_payers', function (req, res, next) {
+  new dividends().get_dividend_analysis("", (result) => {
+    var lstBestDividendPayers = []
+
+    if (result != null) {
+      for (var index = 0; index < result.length; index++) {
+        var didivendPayer = isGoodDividendPayer(result[index])
+
+        if (didivendPayer) {
+          lstBestDividendPayers.push(result[index])
+        }
+      }
+    }
+
+    res.status(HttpStatus.OK).type("json").send(JSON.stringify(lstBestDividendPayers))
+  }, (error) => {
+    res.status(HttpStatus.INTERNAL_SERVER_ERROR).send(error)
+  });
+});
+
 router.get('/dividend_history', function (req, res, next) {
   var stock_code = ""
 
   if ((Object.keys(req.query).length > 0) || (Object.keys(req.query).indexOf("code") > 0)) {
     stock_code = req.query["code"]
-  }else{
+  } else {
     res.status(HttpStatus.BAD_REQUEST).type("json").send(JSON.stringify("Stock code is required"))
   }
 
