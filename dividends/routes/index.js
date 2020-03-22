@@ -20,9 +20,9 @@ var isGoodDividendPayer = function (company) {
   if (!("DIVIDEND_YIELD" in company)) return false
   if (!("DIVIDEND_YIELD_5_YRS" in company)) return false
 
-  if (company.COMPANY == "") return false
-
+  // if (company.COMPANY == "") return false
   // var avgVolOverAvailableVolume = (parseInt(company.STOCK_AVAILABLE_VOLUME) * .2)
+
   if ((parseInt(company.STOCK_AVAILABLE_VOLUME) >= 400000000) &&
     // (parseInt(company.VOL_NEGOTIATED_LAST_21) >= parseInt(avgVolOverAvailableVolume)) &&
     (parseFloat(company.DIVIDEND_AVG_PAYOUT_12_MOS) <= .7) &&
